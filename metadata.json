@@ -1,0 +1,5 @@
+{
+  "name": "Copy of GenAI Resume Analyzer",
+  "description": "A web application that uses the Gemini API to analyze a candidate's resume against a job description. It provides a fit score, a summary, and a detailed breakdown of matching and missing skills. This application serves as a frontend prototype to demonstrate the core AI functionality of the described project plan, without the backend database or Power BI integration.",
+  "requestFramePermissions": []
+}
