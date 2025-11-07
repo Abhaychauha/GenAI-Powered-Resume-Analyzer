@@ -98,7 +98,7 @@ export const rewriteResume = async (resumeText: string, jobDescriptionText: stri
     3.  Rephrase bullet points in the experience section using action verbs and quantifiable achievements that directly align with the job requirements.
     4.  Refine the professional summary to be a compelling pitch for this specific role.
     5.  Ensure the skills section includes keywords from the job description that the candidate possesses.
-    6.  The final output must be only the full text of the rewritten resume, formatted cleanly. Do not include any introductory phrases, explanations, or comments like "Here is the rewritten resume:".
+    6.  The final output must be only the full text of the rewritten resume, formatted cleanly using Markdown for structure (e.g., headings with '#', bold with '**text**', italics with '*text*', and bulleted lists with '-'). Do not include any introductory phrases, explanations, or comments like "Here is the rewritten resume:".
 
     **Original Resume:**
     ---
@@ -125,5 +125,80 @@ export const rewriteResume = async (resumeText: string, jobDescriptionText: stri
   } catch (error) {
     console.error("Error rewriting resume with Gemini API:", error);
     throw new Error("Failed to get rewritten resume from the AI. Please check the console for more details.");
+  }
+};
+
+export const askFollowUp = async (resumeText: string, jobDescriptionText: string, userPrompt: string): Promise<string> => {
+  const prompt = `
+    You are an expert technical recruiter acting as an assistant.
+    You have already analyzed the following resume against the job description.
+    Now, answer the user's follow-up question based on this context.
+    Provide a concise and helpful response formatted in Markdown.
+
+    **Original Resume:**
+    ---
+    ${resumeText}
+    ---
+
+    **Target Job Description:**
+    ---
+    ${jobDescriptionText}
+    ---
+
+    **User's Question:**
+    ---
+    ${userPrompt}
+    ---
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        temperature: 0.4,
+      },
+    });
+
+    return response.text.trim();
+
+  } catch (error) {
+    console.error("Error with follow-up question to Gemini API:", error);
+    throw new Error("Failed to get a response from the AI. Please check the console for more details.");
+  }
+};
+
+export const refineResume = async (currentResume: string, userPrompt: string): Promise<string> => {
+  const prompt = `
+    You are a professional resume editor. The user has provided a resume that has already been tailored for a job.
+    Your task is to apply the user's requested change to the resume and return the FULL, updated resume.
+    Maintain the existing Markdown formatting (headings, bold, lists).
+    Only output the complete and refined resume text. Do not add any commentary, greetings, or explanations before or after the resume content.
+
+    **Current Resume:**
+    ---
+    ${currentResume}
+    ---
+
+    **User's Change Request:**
+    ---
+    ${userPrompt}
+    ---
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+      config: {
+        temperature: 0.4,
+      },
+    });
+
+    return response.text.trim();
+
+  } catch (error) {
+    console.error("Error refining resume with Gemini API:", error);
+    throw new Error("Failed to refine the resume. Please check the console for more details.");
   }
 };
